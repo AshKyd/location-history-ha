@@ -1,0 +1,26 @@
+version: '3.8'
+
+services:
+  location-history:
+    build: .
+    container_name: ha-location-history
+    restart: unless-stopped
+    volumes:
+      - ./data:/data
+    environment:
+      # Required (No defaults)
+      - HA_URL=https://your-instance.ui.nabu.casa
+      - HA_TOKEN=your_token_here
+      
+      # Optional (Defaults shown)
+      - TRACKER_ID=device_tracker.pixel_9_pro
+      - HISTORY_DAYS=10
+      - TIMEZONE=Australia/Brisbane
+      - CRON_SCHEDULE=0 * * * *
+      
+      # Database Path (Should point to volume)
+      - DB_PATH=/data/location_history.db
+      
+      # Sensors (Format: HA_SENSOR_<COL_NAME>=<entity_id>)
+      - HA_SENSOR_BATTERY_LEVEL=sensor.pixel_9_pro_battery_level
+      - HA_SENSOR_IS_CHARGING=binary_sensor.pixel_9_pro_is_charging
