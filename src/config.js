@@ -18,16 +18,20 @@ export const config = {
   sensors: {}
 };
 
-// Parse SENSORS from JSON environment variable (HA_SENSORS='{"col_name": "entity_id"}')
+// Parse SENSORS from environment variable string (HA_SENSORS="col_name:entity_id,col2:entity2")
 if (process.env.HA_SENSORS) {
-  try {
-    const sensorsMap = JSON.parse(process.env.HA_SENSORS);
-    Object.entries(sensorsMap).forEach(([colName, entityId]) => {
-      config.sensors[entityId] = colName.toLowerCase();
-    });
-  } catch (error) {
-    console.error('Failed to parse HA_SENSORS environment variable as JSON:', error.message);
-  }
+  const parts = process.env.HA_SENSORS.split(',');
+  parts.forEach(part => {
+    // Support "col:entity" or "col=entity"
+    const [colName, entityId] = part.split(/[:=]/).map(s => s.trim());
+    
+    if (colName && entityId) {
+       // Remove quotes if user accidentally included them
+       const cleanCol = colName.replace(/['"]/g, '').toLowerCase();
+       const cleanEntity = entityId.replace(/['"]/g, '');
+       config.sensors[cleanEntity] = cleanCol;
+    }
+  });
 }
 
 // Parse SENSORS from individual environment variables (HA_SENSOR_COLUMN_NAME=entity_id)
