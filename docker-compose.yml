@@ -21,6 +21,5 @@ services:
       # Database Path (Should point to volume)
       - DB_PATH=/data/location_history.db
       
-      # Sensors (Format: HA_SENSOR_<COL_NAME>=<entity_id>)
-      - HA_SENSOR_BATTERY_LEVEL=sensor.pixel_9_pro_battery_level
-      - HA_SENSOR_IS_CHARGING=binary_sensor.pixel_9_pro_is_charging
+      # Sensors (Format: JSON string mapping column names to entity IDs)
+      - HA_SENSORS={"battery_level":"sensor.pixel_9_pro_battery_level"}
