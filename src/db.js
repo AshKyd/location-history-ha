@@ -1,6 +1,5 @@
-
-import { DatabaseSync } from 'node:sqlite';
-import { config, SENSOR_COLS } from './config.js';
+import { DatabaseSync } from "node:sqlite";
+import { config, SENSOR_COLS } from "./config.js";
 
 export class DBHelper {
   constructor() {
@@ -35,18 +34,18 @@ export class DBHelper {
 
     // Schema Migration: Add new columns if they don't exist
     const KNOWN_TYPES = {
-      'battery_level': 'INTEGER',
-      'battery_state': 'TEXT',
-      'is_charging': 'INTEGER',
-      'wifi_ssid': 'TEXT',
-      'network_type': 'TEXT',
-      'signal_strength': 'INTEGER',
-      'car_battery': 'INTEGER',
-      'car_fuel_type': 'TEXT'
+      battery_level: "INTEGER",
+      battery_state: "TEXT",
+      is_charging: "INTEGER",
+      wifi_ssid: "TEXT",
+      network_type: "TEXT",
+      signal_strength: "INTEGER",
+      car_battery: "INTEGER",
+      car_fuel_type: "TEXT",
     };
 
     for (const col of SENSOR_COLS) {
-      const type = KNOWN_TYPES[col] || 'TEXT';
+      const type = KNOWN_TYPES[col] || "TEXT";
       try {
         this.db.exec(`ALTER TABLE coordinates ADD COLUMN ${col} ${type}`);
       } catch (e) {
@@ -55,13 +54,24 @@ export class DBHelper {
     }
 
     // Set columns for potential reuse
-    const fixedCols = ['timestamp', 'latitude', 'longitude', 'gps_accuracy', 'altitude', 'course', 'speed', 'vertical_accuracy', 'source_type', 'state'];
+    const fixedCols = [
+      "timestamp",
+      "latitude",
+      "longitude",
+      "gps_accuracy",
+      "altitude",
+      "course",
+      "speed",
+      "vertical_accuracy",
+      "source_type",
+      "state",
+    ];
     this.columns = [...fixedCols, ...SENSOR_COLS];
 
     // Prepare insert statement
-    const placeholders = this.columns.map(() => '?').join(', ');
+    const placeholders = this.columns.map(() => "?").join(", ");
     this.insertStmt = this.db.prepare(`
-      INSERT OR REPLACE INTO coordinates (${this.columns.join(', ')}) 
+      INSERT OR REPLACE INTO coordinates (${this.columns.join(", ")}) 
       VALUES (${placeholders})
     `);
   }
@@ -69,6 +79,13 @@ export class DBHelper {
   insert(record) {
     if (!this.insertStmt) throw new Error("DB not initialized");
     this.insertStmt.run(...record);
+  }
+
+  getRowCount() {
+    const row = this.db
+      .prepare("SELECT count(*) as count FROM coordinates")
+      .get();
+    return row.count;
   }
 
   close() {
